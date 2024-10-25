@@ -204,7 +204,7 @@ const ChatBox = ({onOpenInfoForm}) => {
     word-wrap: break-word;
   `;
 
-  // 添加新的函数来处理健康报告生成
+  // 这个函数要进行修改，并添加相应的错误捕捉和渲染机制
   const handleGenerateReport = async () => {
     setIsGeneratingReport(true);
     setReportProgress([]);
