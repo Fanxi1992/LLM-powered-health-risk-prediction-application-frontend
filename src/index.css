@@ -1,13 +1,61 @@
-body {
-  margin: 0;
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
-    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
-    sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
+@import 'tailwindcss/base';
+@import 'tailwindcss/components';
+@import 'tailwindcss/utilities';
+
+/* 可以保留一些自定义样式，如果有特殊需求的话 */
+
+
+.custom-modal .ant-modal-content {
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
 }
 
-code {
-  font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
-    monospace;
+.custom-modal .ant-modal-header {
+  border-radius: 8px 8px 0 0;
+}
+
+.custom-modal .ant-modal-body {
+  padding: 24px;
+}
+
+.custom-modal .ant-modal-footer {
+  border-radius: 0 0 8px 8px;
+}
+
+
+
+
+/* 定义一些按钮样式，避免冲突 */
+
+.custom-analysis-button {
+  color: white !important;
+  background-color: #4CAF50 !important; /* 绿色背景 */
+  border: none !important;
+  padding: 0 20px !important;
+  text-align: center !important;
+  text-decoration: none !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  font-size: 16px !important;
+  height: 40px !important; /* 设置固定高度 */
+  margin: 4px 2px !important;
+  transition-duration: 0.4s !important;
+  cursor: pointer !important;
+  line-height: 1 !important; /* 确保行高不会影响垂直对齐 */
+}
+
+.custom-analysis-button:hover:not(:disabled) {
+  background-color: #45a049 !important; /* 稍深的绿色 */
+}
+
+.custom-analysis-button.analyzing {
+  background-color: #ffffff !important; /* 灰色背景 */
+  color: #650bcb !important; /* 黄色文字 */
+  cursor: not-allowed !important;
+}
+
+.custom-analysis-button:disabled {
+  opacity: 0.6 !important;
+  cursor: not-allowed !important;
 }
