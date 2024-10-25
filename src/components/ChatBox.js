@@ -9,6 +9,7 @@ import { useChat } from '../context/ChatContext';
 import { useNavigate } from 'react-router-dom';
 import {getToken} from '../utils/user-token'
 import { userid_generate } from '../utils/uuid';
+// import { showToast } from '../utils/toast';
 
 moment.locale('zh-cn');
 
@@ -227,8 +228,23 @@ const ChatBox = ({onOpenInfoForm}) => {
       });
 
       if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
+        // 直接根据 HTTP 状态码处理不同情况
+        switch (response.status) {
+          case 400:
+            throw new Error('认证格式无效，请重新登录');
+          case 404:
+            throw new Error('您尚未登记个人信息，请先登记个人基础信息方可进行健康风险评估');
+          case 500:
+            throw new Error('服务器错误，请稍后重试');
+          default:
+            throw new Error('未知错误');
+        }
       }
+
+
+
+
+
 
       const reader = response.body.getReader();
       let responseContent = "";
@@ -262,6 +278,7 @@ const ChatBox = ({onOpenInfoForm}) => {
               }
             } catch (error) {
               console.error('Error parsing JSON:', error);
+              alert(error.message);
             }
           }
         }
