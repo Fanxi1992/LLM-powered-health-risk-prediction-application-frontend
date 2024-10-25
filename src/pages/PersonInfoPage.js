@@ -119,18 +119,42 @@ function PersonInfoPage() {
           method: 'GET',
           headers: {
             'Content-Type': 'application/json',
+            'Accept': 'application/json'  // 明确指定接受JSON响应
           }
         });
 
+        // 检查响应状态
         if (!response.ok) {
-          throw new Error(`HTTP error! status: ${response.status}`);
+          const contentType = response.headers.get('content-type');
+          if (contentType && contentType.includes('application/json')) {
+            // 如果是JSON格式的错误响应
+            const errorData = await response.json();
+            throw new Error(errorData.message || `HTTP error! status: ${response.status}`);
+          } else {
+            // 如果不是JSON格式
+            const text = await response.text();
+            console.error('服务器返回非JSON响应:', text);
+            throw new Error(`服务器返回了非JSON格式的响应 (${response.status})`);
+          }
+        }
+
+        // 检查响应的Content-Type
+        const contentType = response.headers.get('content-type');
+        if (!contentType || !contentType.includes('application/json')) {
+          throw new Error('服务器返回了非JSON格式的响应');
         }
 
         const data = await response.json();
 
+        // 验证数据结构
+        if (!data || typeof data !== 'object') {
+          throw new Error('返回的数据格式不正确');
+        }
+
         // 处理健康分析文本
         if (data.health_analysis) {
           setHealthAnalysis(data.health_analysis);
+          localStorage.setItem('healthAnalysis', data.health_analysis);
         }
 
         // 处理网络图数据
@@ -170,11 +194,17 @@ function PersonInfoPage() {
           });
 
           setGraph({ ...networkData, nodes, links });
+        } else {
+          console.warn('网络数据结构不完整:', data);
         }
       } catch (error) {
         console.error('加载网络数据时出错:', error);
+        message.error('加载网络数据失败：' + error.message);
         setGraph(null);
-        setHealthAnalysis('尚未生成健康分析报告');
+        // 只有在没有已存储的健康分析报告时才重置
+        if (!localStorage.getItem('healthAnalysis')) {
+          setHealthAnalysis('尚未生成健康分析报告');
+        }
       }
     };
 
