@@ -257,9 +257,14 @@ const ChatBox = ({onOpenInfoForm}) => {
         const lines = decodedValue.split('\n').filter(line => line.trim() !== '');
         
         for (const line of lines) {
+          console.log(line);
           if (line.startsWith('data: ')) {
             try {
               const jsonData = JSON.parse(line.slice(6));
+              if (jsonData.event === 'error'){
+                alert(jsonData.text);
+                break;
+              }
               if (jsonData.event === 'search_process') {
                 setReportProgress(prev => [...prev, jsonData.text]);
               } else if (jsonData.event === 'cmpl') {
