@@ -2,8 +2,10 @@
 import axios from 'axios'
 import {getToken} from './user-token'
 
+// baseURL: 'http://47.236.96.190:8000',
+
 export const request = axios.create({
-    baseURL: 'http://47.236.96.190:8000',
+    baseURL: 'http://localhost:8000',
     timeout: 5000,
 })
 

@@ -32,8 +32,8 @@ const ChatBox = ({onOpenInfoForm}) => {
   const [reportProgress, setReportProgress] = useState([]);
   // const [currentMessage, setCurrentMessage] = useState("");
 
-  // const BASE_URL = 'http://localhost:8000';
-  const BASE_URL = 'http://47.236.96.190:8000';
+  const BASE_URL = 'http://localhost:8000';
+  // const BASE_URL = 'http://47.236.96.190:8000';
 
   // 添加默认问题列表
   const defaultQuestions = [
@@ -142,6 +142,10 @@ const ChatBox = ({onOpenInfoForm}) => {
           if (line.startsWith('data: ')) {
             try {
               const jsonData = JSON.parse(line.slice(6));
+                       // 检查每个数据块的状态
+              if (jsonData.event === 'error') {
+                throw new Error(jsonData.text);
+              }
               if (jsonData.event === 'cmpl') {
                 responseContent += jsonData.text;
                 if (isFirstResponse) {
@@ -167,6 +171,7 @@ const ChatBox = ({onOpenInfoForm}) => {
               }
             } catch (error) {
               console.error('Error parsing JSON:', error);
+              alert(error.message);
             }
           }
         }
@@ -219,12 +224,11 @@ const ChatBox = ({onOpenInfoForm}) => {
       }
 
       const response = await fetch(`${BASE_URL}/generate_report`, {
-        method: 'POST',
+        method: 'GET',
         headers: {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${getToken()}`
         },
-        body: JSON.stringify({ userid: userid }),
       });
 
       if (!response.ok) {
@@ -235,13 +239,11 @@ const ChatBox = ({onOpenInfoForm}) => {
           case 404:
             throw new Error('您尚未登记个人信息，请先登记个人基础信息方可进行健康风险评估');
           case 500:
-            throw new Error('服务器错误，请稍后重试');
+            throw new Error('get_doc阶段发生错误，请稍后重试');
           default:
             throw new Error('未知错误');
         }
       }
-
-
 
 
 

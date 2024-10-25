@@ -7,6 +7,7 @@ import { request } from '../utils/index';
 import { userid_generate } from '../utils/uuid';
 import backgroundImage from '../assets/H1.png';
 import { RightOutlined } from '@ant-design/icons';
+import ReactECharts from 'echarts-for-react';
 
 const { Option } = Select;
 
@@ -29,9 +30,10 @@ function PersonInfoPage() {
     heartrate: '',
     medicalhistory: [],
   });
-  const [healthAnalysis, setHealthAnalysis] = useState('');
+  const [healthAnalysis, setHealthAnalysis] = useState('尚未生成健康分析报告');
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [medicalHistoryOptions, setMedicalHistoryOptions] = useState([]);
+  const [graph, setGraph] = useState(null);
 
   useEffect(() => {
     // 加载 CSV 文件
@@ -103,6 +105,80 @@ function PersonInfoPage() {
     if (healthAnalysis_in_storage === "正在分析中，约十分钟之后可刷新查看结果") {
       queryHealthAnalysis();
     }
+
+    // 修改获取网络数据的函数
+    const fetchNetworkData = async () => {
+      try {
+        let userid = localStorage.getItem('userid');
+        if (!userid) {
+          userid = userid_generate();
+          localStorage.setItem('userid', userid);
+        }
+
+        const response = await fetch(`/api/get-network-data/${userid}`, {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+          }
+        });
+
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+
+        const data = await response.json();
+
+        // 处理健康分析文本
+        if (data.health_analysis) {
+          setHealthAnalysis(data.health_analysis);
+        }
+
+        // 处理网络图数据
+        if (data.network_json?.nodes && data.network_json?.links) {
+          const networkData = data.network_json;
+          // 处理节点大小
+          const nodes = networkData.nodes.map(node => {
+            if (node.value === "") {
+              return { ...node, symbolSize: 30 };
+            }
+            const minSize = 1.5;
+            const maxSize = 50;
+            const minSymbolSize = Math.min(...networkData.nodes.map(n => n.value));
+            const maxSymbolSize = Math.max(...networkData.nodes.map(n => n.value));
+            const scaledSize = minSize + (maxSize - minSize) * 
+              ((node.value - minSymbolSize) / (maxSymbolSize - minSymbolSize));
+            return { ...node, symbolSize: scaledSize };
+          });
+          // 处理连接线宽度
+          const minWidth = 0.2;
+          const maxWidth = 10;
+          const linkValues = networkData.links.map(link => link.value);
+          const minValue = Math.min(...linkValues);
+          const maxValue = Math.max(...linkValues);
+          const links = networkData.links.map(link => {
+            const scaledValue = minWidth + (maxWidth - minWidth) * 
+              ((link.value - minValue) / (maxValue - minValue));
+            // 处理source和target,去掉.0后缀
+            const source = link.source.replace('.0', '');
+            const target = link.target.replace('.0', '');
+            return {
+              ...link,
+              source,
+              target,
+              lineStyle: { width: scaledValue }
+            };
+          });
+
+          setGraph({ ...networkData, nodes, links });
+        }
+      } catch (error) {
+        console.error('加载网络数据时出错:', error);
+        setGraph(null);
+        setHealthAnalysis('尚未生成健康分析报告');
+      }
+    };
+
+    fetchNetworkData();
   }, []);
 
   const queryHealthAnalysis = () => {
@@ -218,7 +294,7 @@ const renderInputField = (label, field, type, required = false, placeholder = ''
   </div>
 );
 
-  // 添加验证函��
+  // 添加验证函
   const validateRequiredFields = () => {
     const requiredFields = [
       { field: 'age', label: '年龄' },
@@ -360,6 +436,54 @@ const renderInputField = (label, field, type, required = false, placeholder = ''
     }
   };
 
+  // 添加网络图配置
+  const getNetworkOption = () => {
+    if (!graph) return {};
+    
+    return {
+      backgroundColor: '#1a1a1a',
+      tooltip: {},
+      legend: [{
+        data: graph.categories?.map(a => a.name) || [],
+        textStyle: { color: '#fff' }
+      }],
+      animationDuration: 1500,
+      animationEasingUpdate: 'quinticInOut',
+      series: [{
+        name: '',
+        type: 'graph',
+        legendHoverLink: false,
+        layout: 'force',
+        force: {
+          repulsion: 1000,
+          edgeLength: [100, 200],
+          gravity: 0.1,
+          friction: 0.6,
+        },
+        data: graph.nodes,
+        links: graph.links,
+        categories: graph.categories,
+        roam: true,
+        label: {
+          show: true,
+          position: 'inside',
+          formatter: params => params.data.symbolSize > 10 ? params.name : '',
+          fontSize: 12,
+          color: '#fff'
+        },
+        lineStyle: {
+          opacity: 0.5,
+          color: 'source',
+          curveness: 0.3
+        },
+        emphasis: {
+          focus: 'adjacency',
+          lineStyle: { width: 5 }
+        }
+      }]
+    };
+  };
+
   return (
     <div className="flex flex-col h-screen bg-gray-100">
       <div
@@ -429,8 +553,26 @@ const renderInputField = (label, field, type, required = false, placeholder = ''
         </div>
         <div className="bg-yellow-100 rounded-lg shadow-md p-6">
           <h2 className="text-2xl font-bold mb-4 text-yellow-800">健康风险分析</h2>
-          <div className="bg-white rounded-lg p-4 shadow-inner">
-            <p className="text-gray-800 leading-relaxed whitespace-pre-wrap break-words">{healthAnalysis}</p>
+          
+          {/* 网络图容器 */}
+          <div className="bg-white rounded-lg p-4 shadow-inner mb-4" style={{ height: '500px' }}>
+            {graph ? (
+              <ReactECharts
+                option={getNetworkOption()}
+                style={{ height: '100%', width: '100%' }}
+              />
+            ) : (
+              <div className="flex items-center justify-center h-full">
+                <span>尚未生成网络图</span>
+              </div>
+            )}
+          </div>
+
+          {/* 健康分析文本 */}
+          <div className="bg-white rounded-lg p-4 shadow-inner mt-4">
+            <p className="text-gray-800 leading-relaxed whitespace-pre-wrap break-words">
+              {healthAnalysis}
+            </p>
           </div>
         </div>
       </div>
