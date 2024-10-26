@@ -115,37 +115,21 @@ function PersonInfoPage() {
           localStorage.setItem('userid', userid);
         }
 
-        const response = await fetch(`/api/get-network-data/${userid}`, {
-          method: 'GET',
+        console.log('正在请求网络数据，userid:', userid);
+
+        // 使用request工具而不是fetch
+        const response = await request.get(`/get-network-data/${userid}`, {
           headers: {
             'Content-Type': 'application/json',
-            'Accept': 'application/json'  // 明确指定接受JSON响应
+            'Accept': 'application/json'
           }
         });
 
-        // 检查响应状态
-        if (!response.ok) {
-          const contentType = response.headers.get('content-type');
-          if (contentType && contentType.includes('application/json')) {
-            // 如果是JSON格式的错误响应
-            const errorData = await response.json();
-            throw new Error(errorData.message || `HTTP error! status: ${response.status}`);
-          } else {
-            // 如果不是JSON格式
-            const text = await response.text();
-            console.error('服务器返回非JSON响应:', text);
-            throw new Error(`服务器返回了非JSON格式的响应 (${response.status})`);
-          }
-        }
+        console.log('收到响应:', response);
 
-        // 检查响应的Content-Type
-        const contentType = response.headers.get('content-type');
-        if (!contentType || !contentType.includes('application/json')) {
-          throw new Error('服务器返回了非JSON格式的响应');
-        }
-
-        const data = await response.json();
-
+        // request工具会自动处理JSON,所以直接使用response.data
+        const data = response.data;
+        
         // 验证数据结构
         if (!data || typeof data !== 'object') {
           throw new Error('返回的数据格式不正确');
@@ -201,7 +185,6 @@ function PersonInfoPage() {
         console.error('加载网络数据时出错:', error);
         message.error('加载网络数据失败：' + error.message);
         setGraph(null);
-        // 只有在没有已存储的健康分析报告时才重置
         if (!localStorage.getItem('healthAnalysis')) {
           setHealthAnalysis('尚未生成健康分析报告');
         }
@@ -585,7 +568,7 @@ const renderInputField = (label, field, type, required = false, placeholder = ''
           <h2 className="text-2xl font-bold mb-4 text-yellow-800">健康风险分析</h2>
           
           {/* 网络图容器 */}
-          <div className="bg-white rounded-lg p-4 shadow-inner mb-4" style={{ height: '500px' }}>
+          <div className="bg-white rounded-lg  shadow-inner mb-4" style={{ height: '500px' }}>
             {graph ? (
               <ReactECharts
                 option={getNetworkOption()}
@@ -599,7 +582,7 @@ const renderInputField = (label, field, type, required = false, placeholder = ''
           </div>
 
           {/* 健康分析文本 */}
-          <div className="bg-white rounded-lg p-4 shadow-inner mt-4">
+          <div className="bg-white rounded-lg p-3 shadow-inner mt-4">
             <p className="text-gray-800 leading-relaxed whitespace-pre-wrap break-words">
               {healthAnalysis}
             </p>

@@ -215,7 +215,14 @@ const ChatBox = ({onOpenInfoForm}) => {
     setIsGeneratingReport(true);
     setReportProgress([]);
     const currentTime = moment().format('YYYY-MM-DD HH:mm:ss');
-    setMessages(prevMessages => [...prevMessages, { text: '正在生成健康报告...', type: 'bot', time: currentTime }]);
+    
+    // 创建初始消息框
+    setMessages(prevMessages => [...prevMessages, { 
+      text: '', 
+      type: 'bot', 
+      time: currentTime,
+      isGeneratingReport: true 
+    }]);
 
     try {
       let userid = localStorage.getItem('userid');
@@ -232,7 +239,6 @@ const ChatBox = ({onOpenInfoForm}) => {
       });
 
       if (!response.ok) {
-        // 直接根据 HTTP 状态码处理不同情况
         switch (response.status) {
           case 400:
             throw new Error('认证格式无效，请重新登录');
@@ -245,11 +251,9 @@ const ChatBox = ({onOpenInfoForm}) => {
         }
       }
 
-
-
-
       const reader = response.body.getReader();
       let responseContent = "";
+      let isFirstCompletion = true;
 
       while (true) {
         const { done, value } = await reader.read();
@@ -259,47 +263,56 @@ const ChatBox = ({onOpenInfoForm}) => {
         const lines = decodedValue.split('\n').filter(line => line.trim() !== '');
         
         for (const line of lines) {
-          console.log(line);
           if (line.startsWith('data: ')) {
             try {
               const jsonData = JSON.parse(line.slice(6));
               if (jsonData.event === 'error'){
-                alert(jsonData.text);
-                break;
+                throw new Error(jsonData.text);
               }
               if (jsonData.event === 'search_process') {
                 setReportProgress(prev => [...prev, jsonData.text]);
               } else if (jsonData.event === 'cmpl') {
-                responseContent += jsonData.text;
-                setMessages(prevMessages => {
-                  const updatedMessages = [...prevMessages];
-                  updatedMessages[updatedMessages.length - 1] = {
-                    text: responseContent,
-                    type: 'bot',
-                    time: currentTime
-                  };
-                  return updatedMessages;
-                });
-              } else if (jsonData.event === 'all_done') {
-                break;
-              }
-            } catch (error) {
+                  // 后续的completion累加显示
+                  responseContent += jsonData.text;
+                  setMessages(prevMessages => {
+                    const updatedMessages = [...prevMessages];
+                    updatedMessages[updatedMessages.length - 1] = {
+                      text: responseContent,
+                      type: 'bot',
+                      time: currentTime,
+                      isGeneratingReport: false
+                    };
+                    return updatedMessages;
+                  });
+                } else if (jsonData.event === 'all_done') {
+                  break;
+                }
+              }catch (error) {
               console.error('Error parsing JSON:', error);
-              alert(error.message);
+              throw error;
             }
           }
         }
       }
     } catch (error) {
       console.error('Error while generating report:', error);
-      setMessages(prevMessages => [...prevMessages, {text: `生成报告时发生错误：${error.message}`, type: 'bot', time: moment().format('YYYY-MM-DD HH:mm:ss')}]);
+      setMessages(prevMessages => {
+        const updatedMessages = [...prevMessages];
+        updatedMessages[updatedMessages.length - 1] = {
+          text: `生成报告时发生错误：${error.message}`,
+          type: 'bot',
+          time: currentTime,
+          isGeneratingReport: false
+        };
+        return updatedMessages;
+      });
     } finally {
       setIsGeneratingReport(false);
       setReportProgress([]);
     }
   };
 
-  // 在渲染消息的部分，将文本内容包裹在这个组件中
+  // 在渲染消息的部分修改
   return (
     <div 
       className="flex flex-col h-full pt-16 bg-cover bg-center"
@@ -357,15 +370,16 @@ const ChatBox = ({onOpenInfoForm}) => {
             <div className={`max-w-[70%] ${item.type === 'user' ? 'bg-blue-500 text-white' : 'bg-white'} rounded-lg p-3 shadow`}>
               {item.type === 'bot' && (
                 <div className="font-bold flex items-center">
-                <span className="inline-flex items-center">
-                  <span className="text-sm leading-none">AI助手</span>
-                  <span className="text-xs ml-1 leading-none">{item.time}</span>
+                  <span className="inline-flex items-center">
+                    <span className="text-sm leading-none">AI助手</span>
+                    <span className="text-xs ml-1 leading-none">{item.time}</span>
                   </span>
                 </div>
               )}
-              <PreserveWhitespace>{item.text}</PreserveWhitespace>
-              {item.type === 'bot' && isGeneratingReport && (
-                <div className="mt-2">
+              {/* 如果是报告生成消息且正在生成中，显示进度信息 */}
+              {item.isGeneratingReport ? (
+                <div>
+                  <div className="mb-2">正在生成健康报告...</div>
                   {reportProgress.map((step, stepIndex) => (
                     <div key={stepIndex} className="flex items-center mb-1 text-sm text-gray-600">
                       <CheckCircleFilled className="text-green-500 mr-2" />
@@ -373,6 +387,8 @@ const ChatBox = ({onOpenInfoForm}) => {
                     </div>
                   ))}
                 </div>
+              ) : (
+                <PreserveWhitespace>{item.text}</PreserveWhitespace>
               )}
             </div>
             {item.type === 'user' && (
