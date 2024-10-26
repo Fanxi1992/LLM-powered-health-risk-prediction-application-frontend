@@ -37,10 +37,10 @@ const ChatBox = ({onOpenInfoForm}) => {
 
   // 添加默认问题列表
   const defaultQuestions = [
-    "我应该如何保持健康的生活方式？",
-    "有哪些常见的慢性病预防措施？",
+    "最近有些头疼咳嗽，可能是什么问题？",
+    "深圳哪家医院看心血管比较好？",
     "如何改善睡眠质量？",
-    "日常饮食应该注意什么？"
+    "糖尿病患者日常饮食应该注意什么？"
   ];
 
   // 添加自动滚动到底部的函数
@@ -343,21 +343,21 @@ const ChatBox = ({onOpenInfoForm}) => {
           <div className="max-w-[70%] bg-white rounded-lg p-3 shadow">
             <div className="font-bold">AI助手</div>
             <div>
-              你好！我是由AIRS团队开发的AI健康预警助手，可以提供健康风险评估、健康管理建议、疾病预防和治疗指导等服务。您可以
+              欢迎使用由AIRS团队开发的AI健康风险评估助手。基于海量医疗数据训练，我们可视化了疾病共病性网络，您可以
               <span 
                 className="font-bold text-blue-500 cursor-pointer hover:underline"
                 onClick={handleNetworkClick}
               >
               点击此处
               </span>
-              查看疾病关联网络实景图，也可以
+              查看关联网络实景，请
               <span 
                 className="font-bold text-blue-500 cursor-pointer hover:underline"
                 onClick={handleAvatarClick}
               >
                 设置您的信息
               </span>
-              以得到更精确的服务。
+              并进行问诊，以得到更精确的评估结果。
             </div>
           </div>
         </div>
