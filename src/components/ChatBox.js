@@ -261,7 +261,11 @@ const ChatBox = ({onOpenInfoForm}) => {
         
         const decodedValue = new TextDecoder().decode(value);
         const lines = decodedValue.split('\n').filter(line => line.trim() !== '');
-        
+
+
+
+
+// 对健康报告进行生成过程        
         for (const line of lines) {
           if (line.startsWith('data: ')) {
             try {
@@ -273,7 +277,16 @@ const ChatBox = ({onOpenInfoForm}) => {
                 setReportProgress(prev => [...prev, jsonData.text]);
               } else if (jsonData.event === 'cmpl') {
                   // 后续的completion累加显示
+                  // console.log("当前chunks", jsonData.text);
                   responseContent += jsonData.text;
+                  // console.log("当前responseContent", responseContent);
+                  if (isFirstCompletion) {
+                  setMessages(prevMessages => [
+                    ...prevMessages,
+                    {text:responseContent, type: 'bot', time: currentTime, isGeneratingReport: false}
+                  ]);
+                  isFirstCompletion = false;
+                } else {
                   setMessages(prevMessages => {
                     const updatedMessages = [...prevMessages];
                     updatedMessages[updatedMessages.length - 1] = {
@@ -284,7 +297,9 @@ const ChatBox = ({onOpenInfoForm}) => {
                     };
                     return updatedMessages;
                   });
-                } else if (jsonData.event === 'all_done') {
+                } 
+              } else if (jsonData.event === 'all_done') {
+                  // responseContent = ""; // 清空 responseContent 以防后续重复
                   break;
                 }
               }catch (error) {
