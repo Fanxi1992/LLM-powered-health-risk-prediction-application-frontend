@@ -2,7 +2,6 @@ import React, { useEffect, useState } from 'react';
 import { Button, Modal, Select, Input, message } from 'antd';
 import { useNavigate } from 'react-router-dom';
 import Papa from 'papaparse';
-import AvatarArea from '../components/AvatarArea';
 import { request } from '../utils/index';
 import { userid_generate } from '../utils/uuid';
 import backgroundImage from '../assets/H1.png';
@@ -182,11 +181,11 @@ function PersonInfoPage() {
           console.warn('网络数据结构不完整:', data);
         }
       } catch (error) {
-        console.error('加载网络数据时出错:', error);
-        message.error('加载网络数据失败：' + error.message);
+        // console.error('加载网络数据时出错:', error);
+        // message.error('加载网络数据失败：' + error.message);
         setGraph(null);
         if (!localStorage.getItem('healthAnalysis')) {
-          setHealthAnalysis('尚未生成健康分析报告');
+          setHealthAnalysis('尚未生成您的健康风险分析报告，请完善个人信息后点击提交，以进行云端分析');
         }
       }
     };
@@ -403,7 +402,7 @@ const renderInputField = (label, field, type, required = false, placeholder = ''
     });
 
     try {
-      // 检查localstorage中是否有userid，没有的话就创建一个
+      // 检查localstorage中是否有userid���没有的话就创建一个
       let userid = localStorage.getItem('userid');
       if (!userid) {
         // 如果不存在或为空,生成新的 userid
@@ -504,12 +503,9 @@ const renderInputField = (label, field, type, required = false, placeholder = ''
         style={{
           backgroundImage: `url(${backgroundImage})`,
           backgroundRepeat: 'no-repeat',
-          backgroundSize: '85% 100%',
+          backgroundSize: '100% 100%', // 修改这里使背景图片占据整行
         }}
-      >
-        {/* AvatarArea 将在各个页面中单独渲染 */}
-      </div>
-      <AvatarArea direction="left" onClick={handleAvatarClick} />
+      />
       <div className="flex-1 overflow-auto p-4">
         <div className="bg-blue-500 rounded-lg shadow-md p-6 mb-6 mt-20">
           <h2 className="text-2xl font-bold mb-4 text-white">基本信息</h2>

@@ -2,7 +2,7 @@ import React, { useEffect, useState, useRef, useCallback } from 'react';
 import { Input, Button, Avatar, Modal, Spin, message } from 'antd';
 import { SendOutlined, UserOutlined, RobotOutlined, FileTextOutlined, CheckCircleFilled } from '@ant-design/icons';
 import styled from 'styled-components'; // 添加这行
-import backgroundImage from '../assets/f2.png';  // 假设图片位于src/assets文件夹中
+import backgroundImage from '../assets/f5.png';  // 假设图片位于src/assets文件夹中
 import moment from 'moment';
 import 'moment/locale/zh-cn';
 import { useChat } from '../context/ChatContext';
