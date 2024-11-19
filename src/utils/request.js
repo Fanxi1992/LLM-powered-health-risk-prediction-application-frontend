@@ -4,10 +4,23 @@ import {getToken} from './user-token'
 
 // baseURL: 'http://47.236.96.190:8000',
 
+// export const request = axios.create({
+//     baseURL: 'http://localhost:8000',
+//     timeout: 5000,
+// })
+
+// 服务器版本
 export const request = axios.create({
-    baseURL: 'http://localhost:8000',
-    timeout: 5000,
+  baseURL: 'http://43.156.56.27:8000',
+  timeout: 5000,
 })
+
+
+
+// export const request = axios.create({
+//     baseURL: 'https://sa5ni199260.vicp.fun:443',
+//     timeout: 5000,
+// })
 
 // 添加请求拦截器
 request.interceptors.request.use(config => {
