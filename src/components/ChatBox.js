@@ -47,7 +47,7 @@ const ChatBox = ({onOpenInfoForm}) => {
   // // 内网映射
   // const BASE_URL = 'https://sa5ni199260.vicp.fun:443';
   // 生产环境 URL（已注释）
-  const BASE_URL = 'http://43.156.56.27:8000';
+  const BASE_URL = 'https://comorbidity.top/api';
 
   // 预设的问题列表，用于快速提问
   const defaultQuestions = [
@@ -238,15 +238,10 @@ const ChatBox = ({onOpenInfoForm}) => {
 
   // 处理生成健康报告的异步函数
   const handleGenerateReport = async () => {
-    // 设置生成报告状态为true,用于控制UI loading效果
     setIsGeneratingReport(true);
-    // 清空报告生成进度数组
     setReportProgress([]);
-    // 获取当前时间戳
     const currentTime = moment().format('YYYY-MM-DD HH:mm:ss');
     
-    // 在消息列表中添加一个空的bot消息,用于后续填充报告内容
-    // isGeneratingReport标记用于特殊UI渲染
     setMessages(prevMessages => [...prevMessages, { 
       text: '', 
       type: 'bot', 
@@ -255,22 +250,19 @@ const ChatBox = ({onOpenInfoForm}) => {
     }]);
 
     try {
-      // 从localStorage获取用户ID,如果没有则生成新的
       let userid = localStorage.getItem('userid');
       if (!userid) {
         userid = userid_generate();
       }
 
-      // 发起生成报告的API请求
       const response = await fetch(`${BASE_URL}/generate_report`, {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${getToken()}`  // 添加认证token
+          'Authorization': `Bearer ${getToken()}`
         },
       });
 
-      // 处理各种HTTP错误状态
       if (!response.ok) {
         switch (response.status) {
           case 400:
@@ -284,42 +276,40 @@ const ChatBox = ({onOpenInfoForm}) => {
         }
       }
 
-      // 使用流式读取响应数据
       const reader = response.body.getReader();
-      let responseContent = "";  // 存储完整的响应内容
-      let isFirstCompletion = true;  // 标记是否是第一次收到完成事件
+      let responseContent = "";
+      let isFirstCompletion = true;
 
-      // 持续读取数据流
       while (true) {
         const { done, value } = await reader.read();
         if (done) break;
         
-        // 解码二进制数据为文本
         const decodedValue = new TextDecoder().decode(value);
-        // 按行分割响应数据,过滤空行
         const lines = decodedValue.split('\n').filter(line => line.trim() !== '');
 
-        // 处理每一行数据
-
-        // 对健康报告进行生成过程        
         for (const line of lines) {
           if (line.startsWith('data: ')) {
             try {
               const jsonData = JSON.parse(line.slice(6));
-              if (jsonData.event === 'error'){
+              
+              if (jsonData.event === 'error') {
                 throw new Error(jsonData.text);
               }
+              
               if (jsonData.event === 'search_process') {
                 setReportProgress(prev => [...prev, jsonData.text]);
               } else if (jsonData.event === 'cmpl') {
-                  // 后续的completion累加显示
-                  // console.log("当前chunks", jsonData.text);
-                  responseContent += jsonData.text;
-                  // console.log("当前responseContent", responseContent);
-                  if (isFirstCompletion) {
+                responseContent += jsonData.text;
+                
+                if (isFirstCompletion) {
                   setMessages(prevMessages => [
                     ...prevMessages,
-                    {text:responseContent, type: 'bot', time: currentTime, isGeneratingReport: false}
+                    {
+                      text: responseContent,
+                      type: 'bot',
+                      time: currentTime,
+                      isGeneratingReport: false
+                    }
                   ]);
                   isFirstCompletion = false;
                 } else {
@@ -333,20 +323,18 @@ const ChatBox = ({onOpenInfoForm}) => {
                     };
                     return updatedMessages;
                   });
-                } 
-              } else if (jsonData.event === 'all_done') {
-                  // responseContent = ""; // 清空 responseContent 以防后续重复
-                  break;
                 }
-              }catch (error) {
-      console.error('Error parsing JSON:', error);
-      throw error;
-    }
-  }
-}
-}
-} catch (error) {
-      // 错误处理:在UI中显示错误信息
+              } else if (jsonData.event === 'all_done') {
+                break;
+              }
+            } catch (error) {
+              console.error('Error parsing JSON:', error);
+              throw error;
+            }
+          }
+        }
+      }
+    } catch (error) {
       console.error('Error while generating report:', error);
       setMessages(prevMessages => {
         const updatedMessages = [...prevMessages];
@@ -359,11 +347,49 @@ const ChatBox = ({onOpenInfoForm}) => {
         return updatedMessages;
       });
     } finally {
-      // 重置所有状态
       setIsGeneratingReport(false);
       setReportProgress([]);
     }
   };
+
+  // 添加一个新的 useEffect 来处理输入框焦点事件
+  useEffect(() => {
+    // 获取输入框元素
+    const inputElement = document.querySelector('input');
+    // 获取聊天消息容器
+    const chatContainer = document.querySelector('.chat-container');
+    
+    // 处理输入框获得焦点的事件
+    const handleFocus = () => {
+      // 给 100ms 的延迟，确保键盘完全弹出
+      setTimeout(() => {
+        scrollToBottom();
+      }, 100);
+    };
+
+    // 处理输入框失去焦点的事件
+    const handleBlur = () => {
+      // 键盘收起时，也需要确保滚动到底部
+      setTimeout(() => {
+        scrollToBottom();
+      }, 100);
+    };
+
+    // 添加事件监听器
+    if (inputElement) {
+      inputElement.addEventListener('focus', handleFocus);
+      inputElement.addEventListener('blur', handleBlur);
+    }
+
+    // 清理函数
+    return () => {
+      if (inputElement) {
+        inputElement.removeEventListener('focus', handleFocus);
+        inputElement.removeEventListener('blur', handleBlur);
+      }
+    };
+  }, []); // 空依赖数组，只在组件挂载时运行一次
+
   // 组件的主要渲染部分
   return (
     // 最外层容器,使用flex布局,占满高度,顶部padding为16,设置背景图
@@ -375,7 +401,7 @@ const ChatBox = ({onOpenInfoForm}) => {
       }}
     >
       {/* 聊天消息容器,可滚动,带边框 */}
-      <div className="flex-1 overflow-y-auto p-4 border-t-2 border-black-200">
+      <div className="chat-container flex-1 overflow-y-auto p-4 border-t-2 border-black-200">
         {/* 欢迎消息部分 */}
         <div className="flex justify-start mb-4">
           {/* 机器人头像 */}
@@ -476,7 +502,7 @@ const ChatBox = ({onOpenInfoForm}) => {
       </div>      
 
       {/* 底部输入框区域 */}
-      <div className="bg-white p-4 border-t-2 border-gray-200">
+      <div className="bg-white p-4 border-t-2 border-gray-200" style={{ position: 'relative', zIndex: 10 }}>
         <div className="flex items-center">
           {/* 生成报告按钮 */}
           <Button

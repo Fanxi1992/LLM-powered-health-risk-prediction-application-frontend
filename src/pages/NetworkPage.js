@@ -12,6 +12,7 @@ const Page = () => {
     };
 
     const [graph, setGraph] = React.useState(null);
+    const chartRef = React.useRef(null);
 
     React.useEffect(() => {
         fetch('/corrected_json_file2.json')
@@ -124,11 +125,23 @@ const Page = () => {
         ]
     };
 
+    const handleTouchEnd = () => {
+        if (chartRef.current) {
+            chartRef.current.getEchartsInstance().dispatchAction({
+                type: 'downplay'
+            });
+        }
+    };
+
     return (
         <div style={{ position: 'relative', height: '100vh', overflow: 'hidden' }}>
             <ReactECharts
+                ref={chartRef}
                 option={option}
                 style={{ height: '100%', width: '100%' }}
+                onEvents={{
+                    touchend: handleTouchEnd
+                }}
             />
             <div style={{
                 position: 'fixed',

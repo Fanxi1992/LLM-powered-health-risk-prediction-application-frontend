@@ -9,13 +9,17 @@ import {getToken} from './user-token'
 //     timeout: 5000,
 // })
 
+// // 服务器版本
+// export const request = axios.create({
+//   baseURL: 'https://comorbidity.top/api',
+//   timeout: 5000,
+// })
+
 // 服务器版本
 export const request = axios.create({
-  baseURL: 'http://43.156.56.27:8000',
+  baseURL: 'https://comorbidity.top/api',
   timeout: 5000,
 })
-
-
 
 // export const request = axios.create({
 //     baseURL: 'https://sa5ni199260.vicp.fun:443',

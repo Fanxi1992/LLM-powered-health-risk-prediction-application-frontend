@@ -59,3 +59,30 @@
   opacity: 0.6 !important;
   cursor: not-allowed !important;
 }
+
+/* 添加移动端输入框相关样式 */
+@media (max-width: 768px) {
+  /* 防止页面弹跳 */
+  html, body {
+    height: 100%;
+    overflow: hidden;
+  }
+
+  /* 确保内容区域可以滚动 */
+  .chat-container {
+    -webkit-overflow-scrolling: touch;
+  }
+
+  /* 修复 iOS 输入框问题 */
+  input, textarea {
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    appearance: none;
+  }
+}
+
+/* 优化输入框焦点时的视觉效果 */
+.chat-container {
+  will-change: transform;
+  transform: translateZ(0);
+}
