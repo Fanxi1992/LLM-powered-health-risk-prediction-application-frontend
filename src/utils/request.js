@@ -17,7 +17,7 @@ import {getToken} from './user-token'
 
 // 服务器版本
 export const request = axios.create({
-  baseURL: 'https://comorbidity.top/api',
+  baseURL: 'http://127.0.0.1:8000/api',
   timeout: 5000,
 })
 

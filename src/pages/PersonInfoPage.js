@@ -148,7 +148,7 @@ function PersonInfoPage() {
             if (node.value === "") {
               return { ...node, symbolSize: 30 };
             }
-            const minSize = 1.5;
+            const minSize = 15;
             const maxSize = 50;
             const minSymbolSize = Math.min(...networkData.nodes.map(n => n.value));
             const maxSymbolSize = Math.max(...networkData.nodes.map(n => n.value));
@@ -479,7 +479,15 @@ const renderInputField = (label, field, type, required = false, placeholder = ''
         label: {
           show: true,
           position: 'inside',
-          formatter: params => params.data.symbolSize > 10 ? params.name : '',
+          formatter: params => {
+            if (params.data.symbolSize > 0) {
+              return [
+                `${params.name}`,  // 节点名称
+                `概率: ${params.data.value}`  // 节点值
+              ].join('\n');
+            }
+            return '';
+          },
           fontSize: 12,
           color: '#fff'
         },

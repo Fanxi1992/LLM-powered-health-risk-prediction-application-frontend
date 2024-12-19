@@ -47,7 +47,7 @@ const ChatBox = ({onOpenInfoForm}) => {
   // // 内网映射
   // const BASE_URL = 'https://sa5ni199260.vicp.fun:443';
   // 生产环境 URL（已注释）
-  const BASE_URL = 'https://comorbidity.top/api';
+  const BASE_URL = 'http://127.0.0.1:8000/api';
 
   // 预设的问题列表，用于快速提问
   const defaultQuestions = [
