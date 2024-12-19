@@ -1,70 +1,133 @@
-# Getting Started with Create React App
+# 共患病健康风险评估助手
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+## 项目介绍
+这是一个基于 React 和人工智能的健康风险评估系统，能够帮助用户评估健康风险、提供健康管理建议以及疾病预防指导。系统通过可视化展示疾病共病性网络，帮助用户更好地理解健康状况。
 
-## Available Scripts
+### 主要功能
+- 🤖 AI 智能问答：提供健康咨询和建议
+- 📊 疾病网络可视化：展示疾病之间的关联性
+- 👤 个人信息管理：记录和管理用户健康信息
+- 📝 健康风险评估：生成个性化的健康风险报告
+- 💬 实时对话：流畅的用户交互体验
 
-In the project directory, you can run:
+## 技术栈
+- React 18
+- React Router v6
+- Ant Design
+- Tailwind CSS
+- Axios
+- ECharts
+- Styled Components
 
-### `npm start`
+## 开始使用
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in your browser.
+### 环境要求
+- Node.js >= 14.0.0
+- npm >= 6.14.0
 
-The page will reload when you make changes.\
-You may also see any lint errors in the console.
+### 安装步骤
 
-### `npm test`
+1. 克隆项目
+```bash
+git clone [项目地址]
+```
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+2. 安装依赖
+```bash
+cd [项目目录]
+npm install
+```
 
-### `npm run build`
+3. 启动开发服务器
+```bash
+npm start
+```
 
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
+4. 构建生产版本
+```bash
+npm run build
+```
 
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
+### 项目结构
+```
+src/
+├── assets/         # 静态资源文件
+├── components/     # 组件文件
+│   ├── ChatBox.js  # 聊天界面组件
+│   ├── InfoForm.js # 信息表单组件
+│   └── ...
+├── context/       # Context 相关文件
+├── pages/         # 页面文件
+│   ├── ChatPage.js     # 聊天主页
+│   ├── NetworkPage.js  # 网络图页面
+│   └── PersonInfoPage.js # 个人信息页面
+├── utils/         # 工具函数
+└── App.js         # 应用入口文件
+```
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+## 功能特点
 
-### `npm run eject`
+### 智能对话系统
+- 基于大规模语言模型的智能问答
+- 支持健康咨询和建议
+- 实时流式响应
+- 预设问题快速提问
 
-**Note: this is a one-way operation. Once you `eject`, you can't go back!**
+### 个人信息管理
+- 完整的个人信息收集
+- 自动计算 BMI 和腰臀比
+- 支持多选疾病史记录
+- 数据本地持久化存储
 
-If you aren't satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
+### 疾病网络可视化
+- 交互式网络图展示
+- 疾病关联度分析
+- 支持缩放和拖拽
+- 自适应布局算法
 
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you're on your own.
+### 健康风险评估
+- 个性化风险分析报告
+- 实时生成评估结果
+- 进度反馈
+- 可视化展示风险因素
 
-You don't have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn't feel obligated to use this feature. However we understand that this tool wouldn't be useful if you couldn't customize it when you are ready for it.
+## API 配置
+项目默认连接到本地开发服务器：
+```javascript
+baseURL: 'http://127.0.0.1:8000/api'
+```
 
-## Learn More
+如需修改 API 地址，请在 `src/utils/request.js` 中更新配置。
 
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
+## 开发指南
 
-To learn React, check out the [React documentation](https://reactjs.org/).
+### 添加新功能
+1. 在 `components` 或 `pages` 目录下创建新组件
+2. 在 `App.js` 中添加路由配置
+3. 更新相关的 Context 或工具函数
 
-### Code Splitting
+### 代码规范
+- 使用 ESLint 进行代码检查
+- 遵循 React Hooks 的使用规范
+- 保持组件的单一职责
+- 注重代码复用和模块化
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/code-splitting](https://facebook.github.io/create-react-app/docs/code-splitting)
+## 部署说明
 
-### Analyzing the Bundle Size
+### 开发环境
+```bash
+npm start
+```
+访问 http://localhost:3000
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size](https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size)
+### 生产环境
+```bash
+npm run build
+serve -s build
+```
 
-### Making a Progressive Web App
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app](https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app)
-
-### Advanced Configuration
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/advanced-configuration](https://facebook.github.io/create-react-app/docs/advanced-configuration)
-
-### Deployment
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/deployment](https://facebook.github.io/create-react-app/docs/deployment)
-
-### `npm run build` fails to minify
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
+## 注意事项
+- 首次使用需要完善个人信息才能获得更准确的健康评估
+- 确保后端服务已正确启动并配置
+- 建议使用现代浏览器访问以获得最佳体验
+- 移动端支持响应式布局
